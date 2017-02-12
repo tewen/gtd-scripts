@@ -1,0 +1,25 @@
+{
+  "name": "gtd-scripts",
+  "version": "0.0.1",
+  "description": "Scripts for getting things done.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tewen/gtd-scripts.git"
+  },
+  "author": "Trevor Ewen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tewen/gtd-scripts/issues"
+  },
+  "homepage": "https://github.com/tewen/gtd-scripts#readme",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "moment": "^2.17.1",
+    "superagent": "^3.4.1",
+    "superagent-promise": "^1.1.0"
+  }
+}
