@@ -6,7 +6,6 @@ const _ = require('lodash');
 const path = require('path');
 const agent = require('superagent-promise')(require('superagent'), Promise);
 
-
 //Lang Codes https://ctrlq.org/code/19899-google-translate-languages
 
 if (process.argv.length >= 5) {
