@@ -34,7 +34,7 @@ if (process.argv.length >= 5) {
 
                 //Translates individual string to language code
                 return agent('GET', apiUrl({
-                    value: encodeURI(value),
+                    value: encodeURIComponent(value),
                     languageKey,
                     apiKey
                 })).then(transformResponse).then((text) => {
