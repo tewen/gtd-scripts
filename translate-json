@@ -21,20 +21,33 @@ if (process.argv.length >= 5) {
         return _.get(JSON.parse(res.text), ['data', 'translations', 0, 'translatedText'], '');
     }
 
-    function iterLeaves(value, keyChain, accumulator, languageKey) {
+    function iterLeaves(value, keyChain, accumulator, languageKey, output) {
         accumulator = accumulator || {};
         keyChain = keyChain || [];
+        const cached = output != null
         if (_.isObject(value)) {
+            if(!_.isObject(output)) output = {}
             return _.chain(value).reduce((handlers, v, k) => {
-                return handlers.concat(iterLeaves(v, keyChain.concat(k), accumulator, languageKey));
-            }, []).flattenDeep().value();
+                return handlers.concat(iterLeaves(v, keyChain.concat(k), accumulator, languageKey, output[k]));
+            }, []).flattenDeep().value();            
+        } else if (cached) {
+            return function () {
+                const cachedValue = output
+                console.log(_.template('Using cached value for <%= value %> in <%= languageKey %>: <%= cachedValue %>')({
+                    value,
+                    languageKey,
+                    cachedValue
+                }))
+                _.set(accumulator, keyChain, cachedValue);
+                return accumulator
+            }
         } else {
             return function () {
-                console.log(_.template('Translating <%= value %> to <%= languageKey %>')({value, languageKey}));
 
+                console.log(_.template('Translating <%= value %> to <%= languageKey %>')({ value, languageKey }));
                 //Translates individual string to language code
                 return agent('GET', apiUrl({
-                    value: encodeURI(value),
+                    value: encodeURIComponent(value),
                     languageKey,
                     apiKey
                 })).then(transformResponse).then((text) => {
@@ -49,13 +62,21 @@ if (process.argv.length >= 5) {
     }
 
     Promise.all(_.reduce(destinationCodes, (sum, languageKey) => {
-        const fileName = _.template('/tmp/<%= languageKey %>-<%= timeStamp %>.json')({
-            languageKey,
-            timeStamp: moment().unix()
+        const fileName = _.template('./tmp/translation-<%= languageKey %>.json')({
+            languageKey
         });
+        const outputJSON = (function () {
+            try {
+                return JSON.parse(fs.readFileSync(path.resolve(_.template('./tmp/translation-<%= languageKey %>.json')({
+                    languageKey
+                })), 'utf-8'))
+            } catch (e) {
+                return {}
+            }
+        })()
 
         //Starts with the top level strings
-        return sum.concat(_.reduce(iterLeaves(JSON.parse(fs.readFileSync(path.resolve(inputFile), 'utf-8')), undefined, undefined, languageKey), (promiseChain, fn) => {
+        return sum.concat(_.reduce(iterLeaves(JSON.parse(fs.readFileSync(path.resolve(inputFile), 'utf-8')), undefined, undefined, languageKey, outputJSON), (promiseChain, fn) => {
             return promiseChain.then(fn);
         }, Promise.resolve()).then((payload) => {
             fs.writeFileSync(fileName, JSON.stringify(payload));
