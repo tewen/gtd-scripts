@@ -19,6 +19,7 @@
   "dependencies": {
     "colors": "^1.1.2",
     "es6-promisify": "^5.0.0",
+    "google-translate-api-browser": "^1.1.71",
     "lodash": "^4.17.4",
     "moment": "^2.17.1",
     "prompt": "^1.0.0",
