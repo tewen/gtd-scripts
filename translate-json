@@ -72,7 +72,7 @@ if (process.argv.length >= 4) {
                         prom = translate(value, { to: languageKey })
                     }
                     
-                    return prom.then((res) => cachedIndex(value, res.text, languageKey))
+                    return prom.then((res) => cachedIndex(value, res, languageKey))
                     .catch((err) => console.log(err))
                     .then((text) => {
                         //Sets the value in the accumulator
