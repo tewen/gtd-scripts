@@ -24,15 +24,15 @@ if (process.argv.length >= 4) {
     }
 
     const getCache = (languageKey) => {
-        try {        
-            dicc[languageKey] = {};    
+        try {
+            dicc[languageKey] = {};
             let fileContent = fs.readFileSync(`./translateCache-${languageKey}.txt`, 'utf-8').split('\n');
             fileContent.map((line)=> {
                 let cached = line.split('|');
                 if(cached[0]) dicc[languageKey][cached[0]] = cached[1];
             });
         } catch (error) {
-            
+
         }
     }
     const cachedIndex = (key, value, languageKey) => {
@@ -56,7 +56,7 @@ if (process.argv.length >= 4) {
             return function () {
                 if(!(value in dicc[languageKey])) {
                     console.log(_.template('Translating <%= value %> to <%= languageKey %>')({value, languageKey}));
-    
+
                     let prom;
                     //Translates individual string to language code
                     if(apiKey != '') {
@@ -68,23 +68,23 @@ if (process.argv.length >= 4) {
                         })).then(transformResponse)
                     }
                     else {
-                        //using free api key 
+                        //using free api key
                         prom = translate(value, { to: languageKey })
                     }
-                    
+
                     return prom.then((res) => cachedIndex(value, res, languageKey))
                     .catch((err) => console.log(err))
                     .then((text) => {
                         //Sets the value in the accumulator
                         _.set(accumulator, keyChain, text);
-    
+
                         //This needs to be returned to it's eventually written to json
                         return accumulator;
                     });
                 }
                 else {
                     console.log(value + ' cached: ' + dicc[languageKey][value]);
-                    _.set(accumulator, keyChain, dicc[languageKey][value]);    
+                    _.set(accumulator, keyChain, dicc[languageKey][value]);
                     return accumulator;
                 }
             };
@@ -104,7 +104,7 @@ if (process.argv.length >= 4) {
         return sum.concat(_.reduce(iterLeaves(JSON.parse(fs.readFileSync(path.resolve(inputFile), 'utf-8')), undefined, undefined, languageKey), (promiseChain, fn) => {
             return promiseChain.then(fn);
         }, Promise.resolve()).then((payload) => {
-            fs.writeFileSync(fileName, JSON.stringify(payload));
+            fs.writeFileSync(fileName, JSON.stringify(payload, null, 4));
         }).then(_.partial(console.log, 'Successfully translated all nodes, file output at ' + fileName)));
     }, [])).then(() => {
         process.exit();
